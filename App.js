@@ -1,8 +1,17 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import { theme } from './colors';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Fontisto } from '@expo/vector-icons';
 
 const STORAGE_KEY = '@todos';
 
@@ -21,8 +30,10 @@ export default function App() {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     };
     const loadTodos = async () => {
-        const item = await AsyncStorage.getItem(STORAGE_KEY);
-        setTodos(JSON.parse(item));
+        try {
+            const item = await AsyncStorage.getItem(STORAGE_KEY);
+            setTodos(JSON.parse(item));
+        } catch (error) {}
     };
     const addTodo = async () => {
         if (!text) return;
@@ -31,6 +42,23 @@ export default function App() {
         setTodos(newTodos);
         await saveTodos(newTodos);
         setText('');
+    };
+    const deleteTodo = (key) => {
+        Alert.alert('Delete Todo', 'Are you sure?', [
+            {
+                text: 'Cancel',
+            },
+            {
+                text: "I'm sure",
+                style: 'destructive',
+                onPress: async () => {
+                    const newTodos = { ...todos };
+                    delete newTodos[key];
+                    setTodos(newTodos);
+                    await saveTodos(newTodos);
+                },
+            },
+        ]);
     };
 
     return (
@@ -63,6 +91,9 @@ export default function App() {
                     todos[key].working === working ? (
                         <View key={key} style={styles.todo}>
                             <Text style={styles.todoText}>{value.text}</Text>
+                            <TouchableOpacity onPress={() => deleteTodo(key)}>
+                                <Fontisto name='trash' size={18} color={theme.grey} />
+                            </TouchableOpacity>
                         </View>
                     ) : null
                 )}
@@ -96,10 +127,13 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     todo: {
-        backgroundColor: theme.grey,
+        backgroundColor: theme.todoBg,
         marginBottom: 10,
         padding: 20,
         borderRadius: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
     todoText: {
         color: 'white',
