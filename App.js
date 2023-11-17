@@ -6,9 +6,16 @@ import { theme } from './colors';
 export default function App() {
     const [working, setWorking] = useState(true);
     const [text, setText] = useState('');
+    const [todos, setTodos] = useState({});
     const travel = () => setWorking(false);
     const work = () => setWorking(true);
     const onChangeText = (payload) => setText(payload);
+    const addTodo = () => {
+        if (!text) return;
+
+        setTodos({ ...todos, [Date.now()]: { text, work: working } });
+        setText('');
+    };
 
     return (
         <View style={styles.container}>
@@ -28,10 +35,11 @@ export default function App() {
 
             <TextInput
                 returnKeyType='done'
-                placeholder={working ? 'Add a To Do' : 'Where do you want to go?'}
+                placeholder={working ? 'Add a Todo' : 'Where do you want to go?'}
                 style={styles.input}
                 value={text}
                 onChangeText={onChangeText}
+                onSubmitEditing={addTodo}
             />
         </View>
     );
