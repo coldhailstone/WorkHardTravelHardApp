@@ -30,10 +30,10 @@ export default function App() {
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     };
     const loadTodos = async () => {
-        try {
-            const item = await AsyncStorage.getItem(STORAGE_KEY);
+        const item = await AsyncStorage.getItem(STORAGE_KEY);
+        if (item) {
             setTodos(JSON.parse(item));
-        } catch (error) {}
+        }
     };
     const addTodo = async () => {
         if (!text) return;
