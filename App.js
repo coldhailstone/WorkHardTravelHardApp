@@ -1,3 +1,4 @@
+import { Fontisto } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -9,9 +10,9 @@ import {
     TextInput,
     TouchableOpacity,
     View,
+    Platform,
 } from 'react-native';
 import { theme } from './colors';
-import { Fontisto } from '@expo/vector-icons';
 
 const STORAGE_KEY = '@todos';
 
@@ -44,21 +45,31 @@ export default function App() {
         setText('');
     };
     const deleteTodo = (key) => {
-        Alert.alert('Delete Todo', 'Are you sure?', [
-            {
-                text: 'Cancel',
-            },
-            {
-                text: "I'm sure",
-                style: 'destructive',
-                onPress: async () => {
-                    const newTodos = { ...todos };
-                    delete newTodos[key];
-                    setTodos(newTodos);
-                    await saveTodos(newTodos);
+        if (Platform.OS === 'web') {
+            const ok = confirm('Do you want to delete this Todo?');
+            if (!ok) return;
+
+            const newTodos = { ...todos };
+            delete newTodos[key];
+            setTodos(newTodos);
+            saveTodos(newTodos);
+        } else {
+            Alert.alert('Delete Todo', 'Are you sure?', [
+                {
+                    text: 'Cancel',
                 },
-            },
-        ]);
+                {
+                    text: "I'm sure",
+                    style: 'destructive',
+                    onPress: () => {
+                        const newTodos = { ...todos };
+                        delete newTodos[key];
+                        setTodos(newTodos);
+                        saveTodos(newTodos);
+                    },
+                },
+            ]);
+        }
     };
 
     return (
